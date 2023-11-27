@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Model, Types } from 'mongoose';
 
 export type TUserName = {
@@ -37,6 +38,7 @@ export type TStudent = {
     guardian: TGuardian;
     localGuardian: TLocalGuardian;
     profileImage?: string;
+    admissionSemester: Types.ObjectId;
     isDeleted: boolean;
 };
 
