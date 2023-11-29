@@ -1,10 +1,10 @@
 import { Schema, model } from 'mongoose';
-import { TAcademicSemester } from './academicSemester.interface';
 import {
     AcademicSemesterCodes,
     AcademicSemesterName,
     Months,
-} from './academicSemesterConstants';
+} from './academicSemester.constants';
+import { TAcademicSemester } from './academicSemester.interface';
 
 // Autumn 01
 // Summer 02
