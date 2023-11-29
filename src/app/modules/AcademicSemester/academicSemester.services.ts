@@ -1,6 +1,6 @@
+import { academicSemesterNameCodeMapper } from './academicSemester.constants';
 import { TAcademicSemester } from './academicSemester.interface';
 import { AcademicSemester } from './academicSemester.model';
-import { academicSemesterNameCodeMapper } from './academicSemesterConstants';
 
 const createAcademicSemesterIntoDB = async (payload: TAcademicSemester) => {
     // semester name --> semester code
