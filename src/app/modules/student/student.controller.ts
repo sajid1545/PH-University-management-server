@@ -6,7 +6,7 @@ import sendResponse from '../../utils/sendResponse';
 import { StudentServices } from './student.services';
 
 const getAllStudents = catchAsync(async (req, res) => {
-    const students = await StudentServices.getAllStudentsFromDB();
+    const students = await StudentServices.getAllStudentsFromDB(req.query);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,

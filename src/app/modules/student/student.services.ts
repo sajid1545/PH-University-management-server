@@ -5,8 +5,38 @@ import { User } from '../user/user.model';
 import { TStudent } from './student.interface';
 import { Student } from './student.model';
 
-const getAllStudentsFromDB = async () => {
-    const result = await Student.find()
+const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
+    console.log('query', query);
+
+    const queryObj = { ...query };
+
+    const studentsSearchableFields = [
+        'email',
+        'name.firstName',
+        'name.middleName',
+        'presentAddress',
+    ];
+    let searchTerm = '';
+
+    if (query?.searchTerm) {
+        searchTerm = query.searchTerm as string;
+    }
+
+    const searchQuery = Student.find({
+        $or: studentsSearchableFields.map((field) => ({
+            [field]: {
+                $regex: searchTerm,
+                $options: 'i',
+            },
+        })),
+    }); // partial search
+
+    // Filtering
+    const excludeFields = ['searchTerm', 'sort', 'limit'];
+    excludeFields.forEach((field) => delete queryObj[field]);
+
+    const filterQuery = searchQuery
+        .find(queryObj)
         .populate('admissionSemester')
         .populate({
             path: 'academicDepartment',
@@ -14,19 +44,26 @@ const getAllStudentsFromDB = async () => {
                 path: 'academicFaculty',
             },
         });
-    return result;
+
+    // Sorting
+    let sort = '-createAt';
+    if (query?.sort) {
+        sort = query.sort as string;
+    }
+
+    const sortQuery = filterQuery.sort(sort);
+
+    let limit = 1;
+    if (query?.limit) {
+        limit = query.limit as number;
+    }
+
+    const limitQuery = await sortQuery.limit(limit);
+
+    return limitQuery;
 };
 
 const getSingleStudentFromDB = async (id: string) => {
-    // const result = await Student.findOne({ id });
-    // const result = await Student.aggregate([
-    //     {
-    //         $match: {
-    //             id,
-    //         },
-    //     },
-    // ]);
-    // return result;
     const result = await Student.findOne({ id })
         .populate('admissionSemester')
         .populate({
