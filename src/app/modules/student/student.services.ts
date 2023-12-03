@@ -3,9 +3,9 @@ import mongoose from 'mongoose';
 import QueryBuilder from '../../builder/QueryBuilder';
 import AppError from '../../errors/AppError';
 import { User } from '../user/user.model';
+import { studentsSearchableFields } from './student.constants';
 import { TStudent } from './student.interface';
 import { Student } from './student.model';
-import { studentsSearchableFields } from './student.constants';
 
 const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
     // email : { $regex : query.searchTerm, $options : i }
@@ -31,13 +31,7 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
     // console.log({ query, queryObj });
     // const filterQuery = searchQuery
     //     .find(queryObj)
-    //     .populate('admissionSemester')
-    //     .populate({
-    //         path: 'academicDepartment',
-    //         populate: {
-    //             path: 'academicFaculty',
-    //         },
-    //     });
+    //
     // // Sorting
     // let sort = '-createAt';
     // if (query?.sort) {
@@ -66,7 +60,17 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
     // return fieldsQuery;
 
     // Student.find() ar upore shob kaaj hocchilo tai aita pataite hobe
-    const studentQuery = new QueryBuilder(Student.find(), query)
+    const studentQuery = new QueryBuilder(
+        Student.find()
+            .populate('admissionSemester')
+            .populate({
+                path: 'academicDepartment',
+                populate: {
+                    path: 'academicFaculty',
+                },
+            }),
+        query,
+    )
         .search(studentsSearchableFields)
         .filter()
         .sort()
