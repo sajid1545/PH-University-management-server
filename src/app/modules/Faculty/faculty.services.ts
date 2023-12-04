@@ -1,5 +1,6 @@
 import QueryBuilder from '../../builder/QueryBuilder';
 import { facultySearchableFields } from './faculty.constants';
+import { TFaculty } from './faculty.interface';
 import { Faculty } from './faculty.model';
 
 const getAllFacultiesFromDB = async (query: Record<string, unknown>) => {
@@ -18,7 +19,27 @@ const getSingleFacultyFromDB = async (id: string) => {
     return result;
 };
 
+const updateFacultyIntoDB = async (id: string, payload: Partial<TFaculty>) => {
+    const { name, ...remainingFacultyData } = payload;
+
+    const modifiedFacultyData: Record<string, unknown> = {
+        ...remainingFacultyData,
+    };
+
+    if (name && Object.keys(name).length) {
+        for (const [key, value] of Object.entries(name)) {
+            modifiedFacultyData[`name.${key}`] = value;
+        }
+    }
+
+    const result = await Faculty.findOneAndUpdate({ id }, modifiedFacultyData, {
+        new: true,
+    });
+    return result;
+};
+
 export const FacultyServices = {
     getAllFacultiesFromDB,
     getSingleFacultyFromDB,
+    updateFacultyIntoDB,
 };
