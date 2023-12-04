@@ -1,4 +1,4 @@
-import { TAcademicSemester } from '../AcademicSemester/academicSemester.interface';
+import { TAcademicSemester } from '../academicSemester/academicSemester.interface';
 import { User } from './user.model';
 
 const findLastStudentId = async () => {
@@ -38,5 +38,12 @@ export const generateStudentId = async (payload: TAcademicSemester) => {
     let incrementId = (Number(currentId) + 1).toString().padStart(4, '0');
 
     incrementId = `${payload.year}${payload.code}${incrementId}`;
+    return incrementId;
+};
+
+export const generateFacultyId = () => {
+    const currentId = (0).toString();
+    let incrementId = (Number(currentId) + 1).toString().padStart(4, '0');
+    incrementId = `F-${incrementId}`;
     return incrementId;
 };
