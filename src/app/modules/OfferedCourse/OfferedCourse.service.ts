@@ -1,4 +1,5 @@
 import httpStatus from 'http-status';
+import QueryBuilder from '../../builder/QueryBuilder';
 import AppError from '../../errors/AppError';
 import { Course } from '../Course/course.model';
 import { Faculty } from '../Faculty/faculty.model';
@@ -121,6 +122,25 @@ const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
     return result;
 };
 
+const getAllOfferedCoursesFromDB = async (query: Record<string, unknown>) => {
+    const offeredCourseQuery = new QueryBuilder(OfferedCourse.find(), query)
+        .filter()
+        .sort()
+        .paginate()
+        .fields();
+    const result = await offeredCourseQuery.modelQuery;
+    return result;
+};
+
+const getSingleOfferedCourseFromDB = async (id: string) => {
+    const isOfferedCourseExists = await OfferedCourse.findById(id);
+    if (!isOfferedCourseExists) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Offered Course not found');
+    }
+    const result = await OfferedCourse.findById(id);
+    return result;
+};
+
 const updateOfferedCourseIntoDB = async (
     id: string,
     payload: Partial<TOfferedCourse>,
@@ -152,11 +172,34 @@ const updateOfferedCourseIntoDB = async (
     return result;
 };
 
-// const deleteOfferedCourseFromDB = async () => {
-//     // registration semester ar status jodi UPCOMING hoi tokon shudu delete korte parbo
-// };
+const deleteOfferedCourseFromDB = async (id: string) => {
+    // registration semester ar status jodi UPCOMING hoi tokon shudu delete korte parbo
+
+    // check if offered course exist
+    const isOfferedCourseExists = await OfferedCourse.findById(id);
+    if (!isOfferedCourseExists) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Offered Course not found');
+    }
+
+    const semesterRegistration = await SemesterRegistration.findById(
+        isOfferedCourseExists.semesterRegistration,
+    ).select('status');
+
+    if (semesterRegistration?.status !== 'UPCOMING') {
+        throw new AppError(
+            httpStatus.BAD_REQUEST,
+            `You cannot delete this offered course because the registered semester is ${semesterRegistration?.status}`,
+        );
+    }
+
+    const result = await OfferedCourse.findByIdAndDelete(id);
+    return result;
+};
 
 export const OfferedCourseServices = {
     createOfferedCourseIntoDB,
     updateOfferedCourseIntoDB,
+    deleteOfferedCourseFromDB,
+    getAllOfferedCoursesFromDB,
+    getSingleOfferedCourseFromDB,
 };

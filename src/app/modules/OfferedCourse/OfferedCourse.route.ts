@@ -20,10 +20,10 @@ router.patch(
     OfferedCourseController.updateOfferedCourse,
 );
 
-// router.get('/:id');
+router.delete('/:id', OfferedCourseController.deleteOfferedCourse);
 
-// router.patch('/:id');
+router.get('/:id', OfferedCourseController.getSingleOfferedCourse);
 
-// router.get('/');
+router.get('/', OfferedCourseController.getAllOfferedCourses);
 
 export const offeredCourseRoutes = router;
