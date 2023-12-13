@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import { AdminRoutes } from '../modules/Admin/admin.routes';
+import { CourseRoutes } from '../modules/Course/course.routes';
 import { FacultyRoutes } from '../modules/Faculty/faculty.routes';
 import { AcademicDepartmentRoutes } from '../modules/academicDepartment/academicDepartment.routes';
 import { AcademicFacultiesRoutes } from '../modules/academicFaculty/academicFaculty.routes';
 import { AcademicSemesterRoutes } from '../modules/academicSemester/academicSemester.route';
+import { semesterRegistrationRoutes } from '../modules/semesterRegistration/semesterRegistration.route';
 import { StudentsRoutes } from '../modules/student/student.route';
 import { UserRoutes } from '../modules/user/user.route';
-import { CourseRoutes } from '../modules/Course/course.routes';
 
 const router = Router();
 
@@ -44,6 +45,11 @@ const moduleRoutes = [
     {
         path: '/courses',
         route: CourseRoutes,
+    },
+
+    {
+        path: '/semester-registrations',
+        route: semesterRegistrationRoutes,
     },
 ];
 
