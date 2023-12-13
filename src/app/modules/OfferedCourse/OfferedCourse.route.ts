@@ -12,6 +12,13 @@ router.post(
     ),
     OfferedCourseController.createOfferedCourse,
 );
+router.patch(
+    '/:id',
+    validateRequest(
+        OfferedCourseValidations.updateOfferedCourseSchemaValidation,
+    ),
+    OfferedCourseController.updateOfferedCourse,
+);
 
 // router.get('/:id');
 
