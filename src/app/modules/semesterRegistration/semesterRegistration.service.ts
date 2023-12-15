@@ -152,7 +152,7 @@ const deleteSemesterRegistrationAndOfferedCoursesFromDB = async (
     try {
         session.startTransaction();
 
-        // delete offered courses asscociated with same registered semester
+        // delete offered courses associated with same registered semester
 
         const registerSemesterAssociatedOfferedCourses =
             await OfferedCourse.find({

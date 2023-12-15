@@ -143,19 +143,54 @@ const getSingleOfferedCourseFromDB = async (id: string) => {
 
 const updateOfferedCourseIntoDB = async (
     id: string,
-    payload: Partial<TOfferedCourse>,
+    payload: Pick<TOfferedCourse, 'faculty' | 'days' | 'startTime' | 'endTime'>,
 ) => {
-    // const { faculty, days, startTime, endTime } = payload;
+    const { faculty, days, startTime, endTime } = payload;
 
+    // check if offered course exist
     const isOfferedCourseExists = await OfferedCourse.findById(id);
 
     if (!isOfferedCourseExists) {
         throw new AppError(httpStatus.NOT_FOUND, 'Offered Course not found');
     }
 
-    const semesterRegistrationStatus = await SemesterRegistration.findById(
-        isOfferedCourseExists.semesterRegistration,
-    ).select('status');
+    // check if faculty  exist
+    const isFacultyExists = await Faculty.findById(faculty);
+
+    if (!isFacultyExists) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Faculty not found');
+    }
+
+    const semesterRegistration = isOfferedCourseExists.semesterRegistration;
+
+    // get the schedule of the faculties
+    const assignedSchedules = await OfferedCourse.find({
+        semesterRegistration,
+        faculty,
+        days: {
+            $in: days,
+        },
+    }).select('days startTime endTime');
+
+    const newSchedule = {
+        days,
+        startTime,
+        endTime,
+    };
+
+    if (hasTimeConflict(assignedSchedules, newSchedule)) {
+        throw new AppError(
+            httpStatus.CONFLICT,
+            'Time conflict with another offered course',
+        );
+    }
+
+    // check if registered semester is upcoming
+
+    const semesterRegistrationStatus =
+        await SemesterRegistration.findById(semesterRegistration).select(
+            'status',
+        );
 
     if (semesterRegistrationStatus?.status !== 'UPCOMING') {
         throw new AppError(
