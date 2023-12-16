@@ -62,6 +62,8 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
     // Student.find() ar upore shob kaaj hocchilo tai aita pataite hobe
     const studentQuery = new QueryBuilder(
         Student.find()
+
+            .populate('user')
             .populate('admissionSemester')
             .populate({
                 path: 'academicDepartment',
