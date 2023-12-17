@@ -1,9 +1,12 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../config';
 import AppError from '../errors/AppError';
 import { TUserRole } from '../modules/user/user.interface';
+import { User } from '../modules/user/user.model';
 import catchAsync from '../utils/catchAsync';
 
 const auth = (...requiredRoles: TUserRole[]) => {
@@ -19,33 +22,44 @@ const auth = (...requiredRoles: TUserRole[]) => {
                 );
             }
 
-            // check if the token is valid
+            // check if the given token is valid
 
-            jwt.verify(
+            const decoded = jwt.verify(
                 token,
                 config.jwt_access_secret as string,
-                function (err, decoded) {
-                    // err
-                    if (err) {
-                        throw new AppError(
-                            httpStatus.UNAUTHORIZED,
-                            'You are not authorized',
-                        );
-                    }
+            ) as JwtPayload;
 
-                    const role = (decoded as JwtPayload)?.role;
+            const { role, userId, iat } = decoded;
 
-                    if (requiredRoles && !requiredRoles.includes(role)) {
-                        throw new AppError(
-                            httpStatus.UNAUTHORIZED,
-                            'You are not authorized',
-                        );
-                    }
-                    // decoded =   { userId: 'A-0001', role: 'admin', iat: 1702741157, exp: 1703605157 }
-                    req.user = decoded as JwtPayload;
-                    next();
-                },
-            );
+            // checking if the user exists
+            const user = await User.isUserExistsByCustom(userId);
+
+            if (!user) {
+                throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+            }
+
+            // checking if the user is deleted
+            if (await User.isUserDeleted(userId)) {
+                throw new AppError(
+                    httpStatus.FORBIDDEN,
+                    'User is already deleted',
+                );
+            }
+
+            // checking if the user is blocked
+            if (await User.isUserBlocked(userId)) {
+                throw new AppError(httpStatus.FORBIDDEN, 'User is blocked!');
+            }
+
+            if (requiredRoles && !requiredRoles.includes(role)) {
+                throw new AppError(
+                    httpStatus.UNAUTHORIZED,
+                    'You are not authorized',
+                );
+            }
+            // decoded =   { userId: 'A-0001', role: 'admin', iat: 1702741157, exp: 1703605157 }
+            req.user = decoded as JwtPayload;
+            next();
         },
     );
 };

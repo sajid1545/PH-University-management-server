@@ -77,4 +77,12 @@ userSchema.statics.isUserBlocked = async function (id: string) {
     return result?.status === 'blocked';
 };
 
+userSchema.statics.isJWTIssuedBeforePasswordChanged = async function (
+    passwordChangedTimestamp: Date,
+    jwtIssuedTimestamp: number,
+) {
+    console.log({ passwordChangedTimestamp, jwtIssuedTimestamp });
+    return passwordChangedTimestamp.getTime() > jwtIssuedTimestamp;
+};
+
 export const User = model<TUser, UserModel>('User', userSchema);
