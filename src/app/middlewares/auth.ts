@@ -51,6 +51,21 @@ const auth = (...requiredRoles: TUserRole[]) => {
                 throw new AppError(httpStatus.FORBIDDEN, 'User is blocked!');
             }
 
+            // checking if issued time
+
+            if (
+                user.passwordChangedAt &&
+                (await User.isJWTIssuedBeforePasswordChanged(
+                    user.passwordChangedAt,
+                    iat as number,
+                ))
+            ) {
+                throw new AppError(
+                    httpStatus.UNAUTHORIZED,
+                    'You are not authorized!',
+                );
+            }
+
             if (requiredRoles && !requiredRoles.includes(role)) {
                 throw new AppError(
                     httpStatus.UNAUTHORIZED,
@@ -58,7 +73,7 @@ const auth = (...requiredRoles: TUserRole[]) => {
                 );
             }
             // decoded =   { userId: 'A-0001', role: 'admin', iat: 1702741157, exp: 1703605157 }
-            req.user = decoded as JwtPayload;
+            req.user = decoded;
             next();
         },
     );
