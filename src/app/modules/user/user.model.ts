@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import { Schema, model } from 'mongoose';
 import config from '../../config';
+import { USER_ROLE } from './user.constant';
 import { TUser, UserModel } from './user.interface';
 
 const userSchema = new Schema<TUser, UserModel>(
@@ -24,7 +25,7 @@ const userSchema = new Schema<TUser, UserModel>(
         },
         role: {
             type: String,
-            enum: ['admin', 'student', 'faculty'],
+            enum: Object.values(USER_ROLE),
         },
         status: {
             type: String,
@@ -77,7 +78,7 @@ userSchema.statics.isUserBlocked = async function (id: string) {
     return result?.status === 'blocked';
 };
 
-userSchema.statics.isJWTIssuedBeforePasswordChanged = async function (
+userSchema.statics.isJWTIssuedBeforePasswordChanged = function (
     passwordChangedTimestamp: Date,
     jwtIssuedTimestamp: number,
 ) {

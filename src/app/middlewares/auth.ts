@@ -55,10 +55,10 @@ const auth = (...requiredRoles: TUserRole[]) => {
 
             if (
                 user.passwordChangedAt &&
-                (await User.isJWTIssuedBeforePasswordChanged(
+                User.isJWTIssuedBeforePasswordChanged(
                     user.passwordChangedAt,
                     iat as number,
-                ))
+                )
             ) {
                 throw new AppError(
                     httpStatus.UNAUTHORIZED,
