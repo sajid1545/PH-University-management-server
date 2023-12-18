@@ -9,6 +9,10 @@ import { TUserRole } from '../modules/user/user.interface';
 import { User } from '../modules/user/user.model';
 import catchAsync from '../utils/catchAsync';
 
+// const auth = (...requiredRoles: Array<keyof typeof USER_ROLE>) => //^ output ("admin" | "student" | "faculty")[]
+
+// const auth = (...requiredRoles: TUserRole[]) => //^ output  ("admin" | "student" | "faculty")[]
+
 const auth = (...requiredRoles: TUserRole[]) => {
     return catchAsync(
         async (req: Request, res: Response, next: NextFunction) => {
