@@ -1,8 +1,11 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
 import config from '../../config';
 import AppError from '../../errors/AppError';
+import { sendImageToCloudinary } from '../../utils/sendImageToCloudinary';
 import { AcademicSemester } from '../AcademicSemester/academicSemester.model';
 import { TAdmin } from '../Admin/admin.interface';
 import { Admin } from '../Admin/admin.model';
@@ -17,14 +20,16 @@ import {
     generateFacultyId,
     generateStudentId,
 } from './user.utils';
-import { sendImageToCloudinary } from '../../utils/sendImageToCloudinary';
 
-const createStudentIntoDB = async (password: string, payload: TStudent) => {
+const createStudentIntoDB = async (
+    password: string,
+    payload: TStudent,
+    file: any,
+) => {
     // create a user object
     const userData: Partial<TUser> = {};
 
     // if password is not provided, use default password
-
     userData.password = password || (config.default_password as string);
 
     // set student role
@@ -48,8 +53,9 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
         //^ create a user (transaction - 1)
 
         // send image to cloudinary
-
-        sendImageToCloudinary();
+        const imageName = `${userData?.id}${payload?.name?.firstName}`;
+        const path = file.path;
+        const { secure_url } = await sendImageToCloudinary(imageName, path);
 
         //~ transaction a create korar somoy array ar bitore data dibo [userData]
         const newUser = await User.create([userData], { session }); // new user akon array age chilo object
@@ -61,6 +67,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
         // set id, _id as user
         payload.id = newUser[0].id;
         payload.user = newUser[0]._id; // reference id
+        payload.profileImage = secure_url;
 
         //^ create a Student (transaction - 2)
 

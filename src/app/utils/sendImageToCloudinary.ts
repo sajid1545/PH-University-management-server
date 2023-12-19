@@ -1,20 +1,41 @@
 import { v2 as cloudinary } from 'cloudinary';
+import fs from 'fs';
 import multer from 'multer';
 import config from '../config';
-export const sendImageToCloudinary = async () => {
-    cloudinary.config({
-        cloud_name: config.cloudinary_cloud_name as string,
-        api_key: config.cloudinary_api_key as string,
-        api_secret: config.cloudinary_api_secret as string,
-    });
 
-    cloudinary.uploader.upload(
-        'https://upload.wikimedia.org/wikipedia/commons/a/ae/Olympic_flag.jpg',
-        { public_id: 'olympic_flag' },
-        function (error, result) {
-            console.log(result);
-        },
-    );
+cloudinary.config({
+    cloud_name: config.cloudinary_cloud_name as string,
+    api_key: config.cloudinary_api_key as string,
+    api_secret: config.cloudinary_api_secret as string,
+});
+
+export const sendImageToCloudinary = async (
+    imageName: string,
+    path: string,
+) => {
+    return new Promise((resolve, reject) => {
+        // upload to cloudinary
+        cloudinary.uploader.upload(
+            path,
+            { public_id: imageName },
+            function (error, result) {
+                if (error) {
+                    reject(error);
+                }
+                resolve(result);
+                // remove the local file
+                fs.unlink(path, (error) => {
+                    // if any error
+                    if (error) {
+                        reject(error);
+                        return;
+                    } else {
+                        resolve('Successfully deleted file!');
+                    }
+                });
+            },
+        );
+    });
 };
 
 const storage = multer.diskStorage({
