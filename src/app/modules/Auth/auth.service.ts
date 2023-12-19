@@ -3,6 +3,7 @@ import httpStatus from 'http-status';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../../config';
 import AppError from '../../errors/AppError';
+import { sendEmail } from '../../utils/sendEmail';
 import { User } from '../user/user.model';
 import { TLoginUser } from './auth.interface';
 import { createToken } from './auth.utils';
@@ -162,8 +163,45 @@ const refreshToken = async (token: string) => {
     };
 };
 
+const forgetPassword = async (userId: string) => {
+    // checking if the user exists
+    const user = await User.isUserExistsByCustom(userId);
+
+    if (!user) {
+        throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+    }
+
+    // checking if the user is deleted
+    if (await User.isUserDeleted(userId)) {
+        throw new AppError(httpStatus.FORBIDDEN, 'User is already deleted');
+    }
+
+    // checking if the user is blocked
+    if (await User.isUserBlocked(userId)) {
+        throw new AppError(httpStatus.FORBIDDEN, 'User is blocked!');
+    }
+
+    const jwtPayload = {
+        userId: user?.id,
+        role: user?.role,
+    };
+
+    const resetToken = createToken(
+        jwtPayload,
+        config.jwt_access_secret as string,
+        '10m',
+    );
+
+    const resetUILink = `${config.reset_password_ui_link}?id=${user.id}&token=${resetToken}`;
+
+    sendEmail(user?.email, resetUILink);
+
+    console.log(resetUILink);
+};
+
 export const AuthServices = {
     loginUser,
     changePassword,
     refreshToken,
+    forgetPassword,
 };

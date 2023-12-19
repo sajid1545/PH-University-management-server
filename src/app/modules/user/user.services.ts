@@ -3,11 +3,11 @@ import httpStatus from 'http-status';
 import mongoose from 'mongoose';
 import config from '../../config';
 import AppError from '../../errors/AppError';
+import { AcademicSemester } from '../AcademicSemester/academicSemester.model';
 import { TAdmin } from '../Admin/admin.interface';
 import { Admin } from '../Admin/admin.model';
 import { TFaculty } from '../Faculty/faculty.interface';
 import { Faculty } from '../Faculty/faculty.model';
-import { AcademicSemester } from '../academicSemester/academicSemester.model';
 import { TStudent } from '../student/student.interface';
 import { Student } from '../student/student.model';
 import { TUser } from './user.interface';
@@ -28,6 +28,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
 
     // set student role
     userData.role = 'student';
+    userData.email = payload.email;
 
     // find academic semester info
     const admissionSemester = await AcademicSemester.findById(
@@ -83,6 +84,7 @@ const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
     userData.password = password || (config.default_password as string);
 
     userData.role = 'faculty';
+    userData.email = payload.email;
 
     const session = await mongoose.startSession();
 
@@ -129,6 +131,7 @@ const createAdminIntoDB = async (password: string, payload: TAdmin) => {
     userData.password = password || (config.default_password as string);
 
     userData.role = 'admin';
+    userData.email = payload.email;
 
     const session = await mongoose.startSession();
 
