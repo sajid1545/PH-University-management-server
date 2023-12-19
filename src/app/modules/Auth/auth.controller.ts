@@ -1,5 +1,6 @@
 import httpStatus from 'http-status';
 import config from '../../config';
+import AppError from '../../errors/AppError';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { AuthServices } from './auth.service';
@@ -66,9 +67,31 @@ const forgetPassword = catchAsync(async (req, res) => {
     });
 });
 
+const resetPassword = catchAsync(async (req, res) => {
+    // req.body
+    // {
+    //     "id" : "A-0001",
+    //     "newPassword" : "admin123"
+    //  }
+    const token = req.headers.authorization;
+    if (!token) {
+        throw new AppError(httpStatus.UNAUTHORIZED, 'Unauthorized access');
+    }
+    const result = await AuthServices.resetPassword(req.body, token);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        // message: 'Password changed successfully',
+        message: 'Password reset successfully',
+        data: result,
+    });
+});
+
 export const AuthControllers = {
     loginUser,
     changePassword,
     refreshToken,
     forgetPassword,
+    resetPassword,
 };
