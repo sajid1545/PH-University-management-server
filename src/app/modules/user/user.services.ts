@@ -17,6 +17,7 @@ import {
     generateFacultyId,
     generateStudentId,
 } from './user.utils';
+import { sendImageToCloudinary } from '../../utils/sendImageToCloudinary';
 
 const createStudentIntoDB = async (password: string, payload: TStudent) => {
     // create a user object
@@ -45,6 +46,10 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
         userData.id = await generateStudentId(admissionSemester);
 
         //^ create a user (transaction - 1)
+
+        // send image to cloudinary
+
+        sendImageToCloudinary();
 
         //~ transaction a create korar somoy array ar bitore data dibo [userData]
         const newUser = await User.create([userData], { session }); // new user akon array age chilo object
