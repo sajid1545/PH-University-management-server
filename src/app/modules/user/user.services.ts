@@ -112,6 +112,7 @@ const createFacultyIntoDB = async (
         //& send image to cloudinary
         const imageName = `${userData?.id}${payload?.name?.firstName}`;
         const path = file.path;
+        console.log(path);
         const { secure_url } = await sendImageToCloudinary(imageName, path);
 
         //^ create a user (transaction - 1)

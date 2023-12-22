@@ -30,7 +30,7 @@ export const createFacultyValidationSchema = z.object({
             bloodGroup: z.enum([...BloodGroup] as [string, ...string[]]),
             presentAddress: z.string(),
             permanentAddress: z.string(),
-            profileImage: z.string(),
+            // profileImage: z.string(),
             academicDepartment: z.string(),
         }),
     }),
