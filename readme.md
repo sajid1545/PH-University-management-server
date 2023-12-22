@@ -16,4 +16,8 @@
 
 -   ### [module-17-part-6](https://github.com/sajid1545/PH-University-management-system/tree/module-17-part-6)
 
--   ### **_[module-18-part-7](https://github.com/sajid1545/PH-University-management-system/tree/module-18-part-7)_**
+-   ### [module-18-part-7](https://github.com/sajid1545/PH-University-management-system/tree/module-18-part-7)
+
+-   ### [module-19-part-8](https://github.com/sajid1545/PH-University-management-system/tree/module-19-part-8)
+
+-   ### [module-20-part-9](https://github.com/sajid1545/PH-University-management-system/tree/module-20-part-9)
