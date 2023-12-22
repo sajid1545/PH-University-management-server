@@ -7,6 +7,7 @@ import { Faculty } from '../Faculty/faculty.model';
 import { OfferedCourse } from '../OfferedCourse/OfferedCourse.model';
 import { SemesterRegistration } from '../semesterRegistration/semesterRegistration.model';
 import { Student } from '../student/student.model';
+import calculateGradeAndPoints from './enrolleCourse.utils';
 import { TEnrolledCourse } from './enrolledCourse.interface';
 import { EnrolledCourse } from './enrolledCourse.model';
 
@@ -211,6 +212,22 @@ const updateEnrolledCourseMarksIntoDB = async (
     const modifiedData: Record<string, unknown> = {
         ...courseMarks,
     };
+
+    if (courseMarks?.finalTerm) {
+        const { classTest1, midTerm, classTest2, finalTerm } =
+            isCourseBelongsToFaculty.courseMarks;
+
+        const totalMarks =
+            Math.ceil(classTest1 * 0.1) +
+            Math.ceil(midTerm * 0.3) +
+            Math.ceil(classTest2 * 0.1) +
+            Math.ceil(finalTerm * 0.5);
+
+        const result = calculateGradeAndPoints(totalMarks);
+        modifiedData.grade = result.grade;
+        modifiedData.gradePoints = result.gradePoints;
+        modifiedData.isCompleted = true;
+    }
 
     if (courseMarks && Object.keys(courseMarks).length > 0) {
         for (const [key, value] of Object.entries(courseMarks)) {
