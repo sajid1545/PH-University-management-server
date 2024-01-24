@@ -1,4 +1,5 @@
 import express from 'express';
+import auth from '../../middlewares/auth';
 import validateRequest from '../../middlewares/validateRequest';
 import { AcademicSemesterControllers } from './academicSemester.controller';
 import { AcademicSemesterValidations } from './academicSemester.validation';
@@ -28,6 +29,10 @@ router.patch(
     AcademicSemesterControllers.updateAcademicSemester,
 );
 
-router.get('/', AcademicSemesterControllers.getAllAcademicSemesters);
+router.get(
+    '/',
+    auth('admin'),
+    AcademicSemesterControllers.getAllAcademicSemesters,
+);
 
 export const AcademicSemesterRoutes = router;
