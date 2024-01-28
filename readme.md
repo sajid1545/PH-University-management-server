@@ -20,8 +20,8 @@
 
 -   ### [module-19-part-8](https://github.com/sajid1545/PH-University-management-system/tree/module-19-part-8)
 
--   ### **_[module-20-part-9](https://github.com/sajid1545/PH-University-management-system/tree/module-20-part-9)_**
+-   ### [module-20-part-9](https://github.com/sajid1545/PH-University-management-system/tree/module-20-part-9)
 
 ## Mission 6
 
--   ### **_[mission-6-module-9-part-10](https://github.com/sajid1545/PH-University-management-server/tree/module-9-part-10)_**
+-   ### [module-9-part-10](https://github.com/sajid1545/PH-University-management-server/tree/module-9-part-10)
