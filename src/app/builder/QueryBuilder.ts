@@ -65,6 +65,7 @@ class QueryBuilder<T> {
         return this;
     }
     async countTotal() {
+        // In Mongoose, Query.prototype.getFilter() is a function that returns the current query filter.
         const totalQueries = this.modelQuery.getFilter();
         const total = await this.modelQuery.model.countDocuments(totalQueries);
         const page = Number(this?.query?.page) || 1;
