@@ -141,7 +141,7 @@ const studentSchema = new Schema<TStudent, StudentModel>(
             type: localGuardianSchema,
             required: [true, 'Local guardian information is required'],
         },
-        profileImage: { type: String },
+        profileImage: { type: String, default: '' },
         admissionSemester: {
             type: Schema.Types.ObjectId,
             ref: 'AcademicSemester',
@@ -149,6 +149,10 @@ const studentSchema = new Schema<TStudent, StudentModel>(
         academicDepartment: {
             type: Schema.Types.ObjectId,
             ref: 'AcademicDepartment',
+        },
+        academicFaculty: {
+            type: Schema.Types.ObjectId,
+            ref: 'AcademicFaculty',
         },
 
         isDeleted: { type: Boolean, default: false },
@@ -184,11 +188,5 @@ studentSchema.statics.isUserExists = async function (id: string) {
     const existingUser = await Student.findOne({ id });
     return existingUser;
 };
-
-// creating custom instance methods
-// studentSchema.methods.isUserExists = async function (id: string) {
-//     const existingUser = await Student.findOne({ id });
-//     return existingUser;
-// };
 
 export const Student = model<TStudent, StudentModel>('Student', studentSchema);

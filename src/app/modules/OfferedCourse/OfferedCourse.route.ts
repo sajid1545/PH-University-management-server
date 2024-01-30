@@ -1,12 +1,38 @@
 import express from 'express';
+import auth from '../../middlewares/auth';
 import validateRequest from '../../middlewares/validateRequest';
+import { USER_ROLE } from '../user/user.constant';
 import { OfferedCourseController } from './OfferedCourse.controller';
 import { OfferedCourseValidations } from './OfferedCourse.validation';
 
 const router = express.Router();
 
+router.get(
+    '/',
+    auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.faculty),
+    OfferedCourseController.getAllOfferedCourses,
+);
+
+router.get(
+    '/my-offered-courses',
+    auth(USER_ROLE.student),
+    OfferedCourseController.getMyOfferedCourses,
+);
+
+router.get(
+    '/:id',
+    auth(
+        USER_ROLE.superAdmin,
+        USER_ROLE.admin,
+        USER_ROLE.faculty,
+        USER_ROLE.student,
+    ),
+    OfferedCourseController.getSingleOfferedCourse,
+);
+
 router.post(
     '/create-offered-course',
+    auth(USER_ROLE.superAdmin, USER_ROLE.admin),
     validateRequest(
         OfferedCourseValidations.createOfferedCourseSchemaValidation,
     ),
@@ -14,16 +40,17 @@ router.post(
 );
 router.patch(
     '/:id',
+    auth(USER_ROLE.superAdmin, USER_ROLE.admin),
     validateRequest(
         OfferedCourseValidations.updateOfferedCourseSchemaValidation,
     ),
     OfferedCourseController.updateOfferedCourse,
 );
 
-router.delete('/:id', OfferedCourseController.deleteOfferedCourse);
-
-router.get('/:id', OfferedCourseController.getSingleOfferedCourse);
-
-router.get('/', OfferedCourseController.getAllOfferedCourses);
+router.delete(
+    '/:id',
+    auth(USER_ROLE.superAdmin, USER_ROLE.admin),
+    OfferedCourseController.deleteOfferedCourse,
+);
 
 export const offeredCourseRoutes = router;

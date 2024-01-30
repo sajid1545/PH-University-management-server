@@ -11,6 +11,7 @@ import { TAdmin } from '../Admin/admin.interface';
 import { Admin } from '../Admin/admin.model';
 import { TFaculty } from '../Faculty/faculty.interface';
 import { Faculty } from '../Faculty/faculty.model';
+import { AcademicDepartment } from '../academicDepartment/academicDepartment.model';
 import { TStudent } from '../student/student.interface';
 import { Student } from '../student/student.model';
 import { TUser } from './user.interface';
@@ -41,6 +42,17 @@ const createStudentIntoDB = async (
         payload.admissionSemester,
     );
 
+    // FIND DEPARTMENT
+    const academicDepartment = await AcademicDepartment.findById(
+        payload.academicDepartment,
+    );
+
+    if (!academicDepartment) {
+        throw new AppError(httpStatus.BAD_REQUEST, 'Invalid Department');
+    }
+
+    payload.academicFaculty = academicDepartment.academicFaculty;
+
     const session = await mongoose.startSession();
 
     //!     -----------     transaction --------------
@@ -53,9 +65,12 @@ const createStudentIntoDB = async (
         //^ create a user (transaction - 1)
 
         //& send image to cloudinary
-        const imageName = `${userData?.id}${payload?.name?.firstName}`;
-        const path = file.path;
-        const { secure_url } = await sendImageToCloudinary(imageName, path);
+        if (file) {
+            const imageName = `${userData?.id}${payload?.name?.firstName}`;
+            const path = file.path;
+            const { secure_url } = await sendImageToCloudinary(imageName, path);
+            payload.profileImage = secure_url as string;
+        }
 
         //~ transaction a create korar somoy array ar bitore data dibo [userData]
         const newUser = await User.create([userData], { session }); // new user akon array age chilo object
@@ -67,7 +82,6 @@ const createStudentIntoDB = async (
         // set id, _id as user
         payload.id = newUser[0].id;
         payload.user = newUser[0]._id; // reference id
-        payload.profileImage = secure_url;
 
         //^ create a Student (transaction - 2)
 
@@ -102,6 +116,17 @@ const createFacultyIntoDB = async (
     userData.role = 'faculty';
     userData.email = payload.email;
 
+    // FIND DEPARTMENT
+    const academicDepartment = await AcademicDepartment.findById(
+        payload.academicDepartment,
+    );
+
+    if (!academicDepartment) {
+        throw new AppError(httpStatus.BAD_REQUEST, 'Invalid Department');
+    }
+
+    payload.academicFaculty = academicDepartment?.academicFaculty;
+
     const session = await mongoose.startSession();
 
     try {
@@ -110,10 +135,12 @@ const createFacultyIntoDB = async (
         userData.id = await generateFacultyId();
 
         //& send image to cloudinary
-        const imageName = `${userData?.id}${payload?.name?.firstName}`;
-        const path = file.path;
-        console.log(path);
-        const { secure_url } = await sendImageToCloudinary(imageName, path);
+        if (file) {
+            const imageName = `${userData?.id}${payload?.name?.firstName}`;
+            const path = file.path;
+            const { secure_url } = await sendImageToCloudinary(imageName, path);
+            payload.profileImage = secure_url as string;
+        }
 
         //^ create a user (transaction - 1)
 
@@ -125,7 +152,6 @@ const createFacultyIntoDB = async (
         // set id, _id as user
         payload.id = newUser[0].id;
         payload.user = newUser[0]._id; // reference id
-        payload.profileImage = secure_url;
 
         //^ create a faculty (transaction - 2)
 
@@ -167,9 +193,12 @@ const createAdminIntoDB = async (
         userData.id = await generateAdminId();
 
         //& send image to cloudinary
-        const imageName = `${userData?.id}${payload?.name?.firstName}`;
-        const path = file.path;
-        const { secure_url } = await sendImageToCloudinary(imageName, path);
+        if (file) {
+            const imageName = `${userData?.id}${payload?.name?.firstName}`;
+            const path = file.path;
+            const { secure_url } = await sendImageToCloudinary(imageName, path);
+            payload.profileImage = secure_url as string;
+        }
 
         //^ transaction 1 create new user
         const newUser = await User.create([userData], { session });
@@ -180,7 +209,6 @@ const createAdminIntoDB = async (
         // setting id
         payload.id = newUser[0].id;
         payload.user = newUser[0]._id;
-        payload.profileImage = secure_url;
 
         //^ transaction 2 create new Admin
 

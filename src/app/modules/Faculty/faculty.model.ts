@@ -24,7 +24,7 @@ const userNameSchema = new Schema<TUserName>({
         required: [true, 'Last name is required'],
         trim: true,
         validate: {
-            validator: (value: string) => validator.isAlpha(value), // name a number use korte parbo "sajid124 --> aita te error dibe"
+            validator: (value: string) => validator.isAlpha(value),
             message: '{VALUE} is not valid',
         },
     },
@@ -96,13 +96,17 @@ const facultySchema = new Schema<TFaculty>(
             required: [true, 'Permanent address is required'],
         },
 
-        profileImage: { type: String },
+        profileImage: { type: String, default: '' },
 
         academicDepartment: {
             type: Schema.Types.ObjectId,
             ref: 'AcademicDepartment',
         },
 
+        academicFaculty: {
+            type: Schema.Types.ObjectId,
+            ref: 'AcademicFaculty',
+        },
         isDeleted: { type: Boolean, default: false },
     },
     {

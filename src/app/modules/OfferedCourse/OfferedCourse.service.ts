@@ -6,6 +6,7 @@ import { Faculty } from '../Faculty/faculty.model';
 import { AcademicDepartment } from '../academicDepartment/academicDepartment.model';
 import { AcademicFaculty } from '../academicFaculty/academicFaculty.model';
 import { SemesterRegistration } from '../semesterRegistration/semesterRegistration.model';
+import { Student } from '../student/student.model';
 import { TOfferedCourse } from './OfferedCourse.interface';
 import { OfferedCourse } from './OfferedCourse.model';
 import { hasTimeConflict } from './OfferedCourse.utils';
@@ -129,7 +130,171 @@ const getAllOfferedCoursesFromDB = async (query: Record<string, unknown>) => {
         .paginate()
         .fields();
     const result = await offeredCourseQuery.modelQuery;
-    return result;
+    const meta = await offeredCourseQuery.countTotal();
+    return {
+        meta,
+        result,
+    };
+};
+
+const getMyOfferedCoursesFromDB = async (userId: string) => {
+    // check if user exists
+    const student = await Student.findOne({ id: userId });
+    if (!student) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Student not found');
+    }
+
+    //find current ongoing semester
+    const currentOngoingRegistrationSemester =
+        await SemesterRegistration.findOne({
+            status: 'ONGOING',
+        });
+
+    if (!currentOngoingRegistrationSemester) {
+        throw new AppError(
+            httpStatus.NOT_FOUND,
+            'There is no ongoing semester registration!',
+        );
+    }
+
+    const result = await OfferedCourse.aggregate([
+        {
+            $match: {
+                semesterRegistration: currentOngoingRegistrationSemester._id,
+                academicFaculty: student.academicFaculty,
+                academicDepartment: student.academicDepartment,
+            },
+        },
+
+        {
+            $lookup: {
+                from: 'courses',
+                localField: 'course',
+                foreignField: '_id',
+                as: 'course',
+            },
+        },
+
+        {
+            $unwind: '$course',
+        },
+
+        {
+            $lookup: {
+                from: 'enrolledcourses',
+                let: {
+                    currentOngoingRegistrationSemester:
+                        currentOngoingRegistrationSemester._id,
+                    currentStudent: student._id,
+                },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    {
+                                        $eq: [
+                                            //* current registration semester and enrolled registration semester should be same
+                                            '$semesterRegistration',
+                                            '$$currentOngoingRegistrationSemester',
+                                        ],
+                                    },
+                                    {
+                                        //* current student and enrolled student should be same
+                                        $eq: ['$student', '$$currentStudent'],
+                                    },
+                                    {
+                                        $eq: ['$isEnrolled', true],
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                ],
+                as: 'enrolledCourses',
+            },
+        },
+
+        {
+            $lookup: {
+                from: 'enrolledcourses',
+                let: {
+                    currentStudent: student._id,
+                },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    {
+                                        $eq: ['$student', '$$currentStudent'],
+                                    },
+
+                                    {
+                                        $eq: ['$isCompleted', true],
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                ],
+                as: 'completedCourses',
+            },
+        },
+
+        {
+            //* completed course ar ids gula lagbe
+            $addFields: {
+                completedCourseIds: {
+                    $map: {
+                        input: '$completedCourses',
+                        as: 'completed',
+                        in: '$$completed.course',
+                    },
+                },
+            },
+        },
+
+        {
+            $addFields: {
+                //* course prerequisites r completed course ids ar sathe compare
+                isPreRequisitesFulFilled: {
+                    $or: [
+                        { $eq: ['$course.preRequisiteCourses', []] },
+                        {
+                            $setIsSubset: [
+                                '$course.preRequisiteCourses.course',
+                                '$completedCourseIds',
+                            ],
+                        },
+                    ],
+                },
+
+                isAlreadyEnrolled: {
+                    $in: [
+                        '$course._id',
+                        {
+                            $map: {
+                                input: '$enrolledCourses',
+                                as: 'enroll',
+                                in: '$$enroll.course',
+                            },
+                        },
+                    ],
+                },
+            },
+        },
+        {
+            $match: {
+                isAlreadyEnrolled: false,
+                isPreRequisitesFulFilled: true,
+            },
+        },
+    ]);
+
+    return {
+        result,
+    };
 };
 
 const getSingleOfferedCourseFromDB = async (id: string) => {
@@ -237,4 +402,5 @@ export const OfferedCourseServices = {
     deleteOfferedCourseFromDB,
     getAllOfferedCoursesFromDB,
     getSingleOfferedCourseFromDB,
+    getMyOfferedCoursesFromDB,
 };

@@ -60,7 +60,7 @@ const deleteFacultyFromDB = async (id: string) => {
         const deleteFaculty = await Faculty.findOneAndUpdate(
             { id },
             { isDeleted: true },
-            { new: true, session }, // { new : true } returns the updated document
+            { new: true, session },
         );
 
         if (!deleteFaculty) {

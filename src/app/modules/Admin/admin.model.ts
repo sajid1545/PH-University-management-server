@@ -3,24 +3,27 @@ import validator from 'validator';
 import { BloodGroup, Gender } from './admin.constants';
 import { TAdmin, TUserName } from './admin.interface';
 
-const userNameSchema = new Schema<TUserName>({
-    firstName: {
-        type: String,
-        required: [true, 'First Name is required'],
-        trim: true,
-        maxlength: [20, 'Name can not be more than 20 characters'],
+const userNameSchema = new Schema<TUserName>(
+    {
+        firstName: {
+            type: String,
+            required: [true, 'First Name is required'],
+            trim: true,
+            maxlength: [20, 'Name can not be more than 20 characters'],
+        },
+        middleName: {
+            type: String,
+            trim: true,
+        },
+        lastName: {
+            type: String,
+            trim: true,
+            required: [true, 'Last Name is required'],
+            maxlength: [20, 'Name can not be more than 20 characters'],
+        },
     },
-    middleName: {
-        type: String,
-        trim: true,
-    },
-    lastName: {
-        type: String,
-        trim: true,
-        required: [true, 'Last Name is required'],
-        maxlength: [20, 'Name can not be more than 20 characters'],
-    },
-});
+    { _id: false },
+);
 
 const adminSchema = new Schema<TAdmin>({
     id: {
@@ -87,7 +90,7 @@ const adminSchema = new Schema<TAdmin>({
         required: [true, 'Permanent address is required'],
     },
 
-    profileImage: { type: String },
+    profileImage: { type: String, default: '' },
 
     isDeleted: { type: Boolean, default: false },
 });
