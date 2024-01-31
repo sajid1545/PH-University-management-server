@@ -2,8 +2,8 @@ import httpStatus from 'http-status';
 import mongoose from 'mongoose';
 import QueryBuilder from '../../builder/QueryBuilder';
 import AppError from '../../errors/AppError';
+import { AcademicSemester } from '../AcademicSemester/academicSemester.model';
 import { OfferedCourse } from '../OfferedCourse/OfferedCourse.model';
-import { AcademicSemester } from '../academicSemester/academicSemester.model';
 import { RegistrationStatus } from './semesterRegistration.constant';
 import { TSemesterRegistration } from './semesterRegistration.interface';
 import { SemesterRegistration } from './semesterRegistration.model';
@@ -51,6 +51,7 @@ const createSemesterRegistrationIntoDB = async (
     const result = await SemesterRegistration.create(payload);
     return result;
 };
+
 const getAllSemesterRegistrationsFromDB = async (
     query: Record<string, unknown>,
 ) => {
@@ -58,19 +59,24 @@ const getAllSemesterRegistrationsFromDB = async (
         SemesterRegistration.find().populate('academicSemester'),
         query,
     )
-
         .filter()
         .sort()
         .paginate()
         .fields();
 
     const result = await semesterRegistrationQuery.modelQuery;
-    return result;
+    const meta = await semesterRegistrationQuery.countTotal();
+    return {
+        result,
+        meta,
+    };
 };
+
 const getSingleSemesterRegistrationFromDB = async (id: string) => {
     const result = await SemesterRegistration.findById(id);
     return result;
 };
+
 const updateSemesterRegistrationIntoDB = async (
     id: string,
     payload: Partial<TSemesterRegistration>,

@@ -8,14 +8,18 @@ import { TFaculty } from './faculty.interface';
 import { Faculty } from './faculty.model';
 
 const getAllFacultiesFromDB = async (query: Record<string, unknown>) => {
-    const faculties = new QueryBuilder(Faculty.find(), query)
+    const facultyQuery = new QueryBuilder(Faculty.find(), query)
         .search(facultySearchableFields)
         .filter()
         .sort()
         .paginate()
         .fields();
-    const result = await faculties.modelQuery;
-    return result;
+    const result = await facultyQuery.modelQuery;
+    const meta = await facultyQuery.countTotal();
+    return {
+        result,
+        meta,
+    };
 };
 
 const getSingleFacultyFromDB = async (id: string) => {
