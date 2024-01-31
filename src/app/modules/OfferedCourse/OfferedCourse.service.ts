@@ -138,13 +138,13 @@ const getAllOfferedCoursesFromDB = async (query: Record<string, unknown>) => {
 };
 
 const getMyOfferedCoursesFromDB = async (userId: string) => {
-    // check if user exists
+    //! check if user exists
     const student = await Student.findOne({ id: userId });
     if (!student) {
         throw new AppError(httpStatus.NOT_FOUND, 'Student not found');
     }
 
-    //find current ongoing semester
+    //! find current ongoing semester
     const currentOngoingRegistrationSemester =
         await SemesterRegistration.findOne({
             status: 'ONGOING',
