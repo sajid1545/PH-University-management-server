@@ -22,7 +22,7 @@ const getAllAdminsFromDB = async (query: Record<string, unknown>) => {
 };
 
 const getSingleAdminFromDB = async (id: string) => {
-    const result = await Admin.findOne({ id });
+    const result = await Admin.findById(id);
 
     return result;
 };
