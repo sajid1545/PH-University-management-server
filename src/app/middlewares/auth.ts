@@ -81,7 +81,7 @@ const auth = (...requiredRoles: TUserRole[]) => {
             if (requiredRoles && !requiredRoles.includes(role)) {
                 throw new AppError(
                     httpStatus.UNAUTHORIZED,
-                    'You are not authorized',
+                    'You are not authorized for this action',
                 );
             }
             // decoded =   { userId: 'A-0001', role: 'admin', iat: 1702741157, exp: 1703605157 }
